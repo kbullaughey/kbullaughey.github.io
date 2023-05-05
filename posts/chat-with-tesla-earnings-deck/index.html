@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Chat with Tesla Earnings Deck | AI learnings</title>
+<meta name="keywords" content="">
+<meta name="description" content="Since LangChain seems like a fairly powerful way to recursively call OpenAI LLMs, I wanted to understand how this dark magic worked. I came accross this gist by @virattt where he creates a simple chatbot to chat with a Facebook earnings PDF. This seemed like a good place to start.
+I created my own adaptation that reproduces the simple chatbot, but this time talking with the Tesla Q1 2023 earnings deck.">
+<meta name="author" content="">
+<link rel="canonical" href="https://kbullaughey.github.io/posts/chat-with-tesla-earnings-deck/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.04b37ae66f621733f5ee925c7ae5c8e61060be020a04a41396a1e1b1d9641234.css" integrity="sha256-BLN65m9iFzP17pJceuXI5hBgvgIKBKQTlqHhsdlkEjQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://kbullaughey.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://kbullaughey.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://kbullaughey.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://kbullaughey.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://kbullaughey.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Chat with Tesla Earnings Deck" />
+<meta property="og:description" content="Since LangChain seems like a fairly powerful way to recursively call OpenAI LLMs, I wanted to understand how this dark magic worked. I came accross this gist by @virattt where he creates a simple chatbot to chat with a Facebook earnings PDF. This seemed like a good place to start.
+I created my own adaptation that reproduces the simple chatbot, but this time talking with the Tesla Q1 2023 earnings deck." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://kbullaughey.github.io/posts/chat-with-tesla-earnings-deck/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-05-05T09:23:51-04:00" />
+<meta property="article:modified_time" content="2023-05-05T09:23:51-04:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Chat with Tesla Earnings Deck"/>
+<meta name="twitter:description" content="Since LangChain seems like a fairly powerful way to recursively call OpenAI LLMs, I wanted to understand how this dark magic worked. I came accross this gist by @virattt where he creates a simple chatbot to chat with a Facebook earnings PDF. This seemed like a good place to start.
+I created my own adaptation that reproduces the simple chatbot, but this time talking with the Tesla Q1 2023 earnings deck."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Posts",
+      "item": "https://kbullaughey.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Chat with Tesla Earnings Deck",
+      "item": "https://kbullaughey.github.io/posts/chat-with-tesla-earnings-deck/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Chat with Tesla Earnings Deck",
+  "name": "Chat with Tesla Earnings Deck",
+  "description": "Since LangChain seems like a fairly powerful way to recursively call OpenAI LLMs, I wanted to understand how this dark magic worked. I came accross this gist by @virattt where he creates a simple chatbot to chat with a Facebook earnings PDF. This seemed like a good place to start.\nI created my own adaptation that reproduces the simple chatbot, but this time talking with the Tesla Q1 2023 earnings deck.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Since LangChain seems like a fairly powerful way to recursively call OpenAI LLMs, I wanted to understand how this dark magic worked. I came accross this gist by @virattt where he creates a simple chatbot to chat with a Facebook earnings PDF. This seemed like a good place to start.\nI created my own adaptation that reproduces the simple chatbot, but this time talking with the Tesla Q1 2023 earnings deck. I then extend his example in the last section by showing what’s happening under the hood inside LangChain. Hopefully this will provide some intuition for how LangChain works and how powerful simple recursive prompting with a language model can be, particularly when combined with some outside tools (like a vector embedding database).\nBut before we dive in, let’s see what it can do.\nWe can ask it any question we suspect will be answerable in the Tesla 2023 Q1 earnings deck. For example:\nbot.ask(\"What was Tesla's revenue in the latest quarter?\") To which we get this reply:\nTesla’s revenue in the latest quarter was $23.3 billion.\nOr we can ask it:\nbot.ask(\"What was net income in the latest quarter?\") And the bot tells us this:\nTesla’s net income in the latest quarter was $2.5B GAAP net income.\nOr we can ask more open ended questions, like this one:\nbot.ask(\"What progress was there on full self driving during the quarter?\") And we get this short statement:\nTesla enabled the latest FSD Beta software stack for highway driving in the latest quarter.\nAnd if we want to know more about FSD progress:\nbot.ask(\"How many miles have been driven on FSD to date?\") To which the bot responds:\nOver 150 million miles.\nSometimes we get longer answers:\nbot.ask(\"Can you describe how the energy business has been growing?\") Such as this response:\nEnergy storage deployments increased by 360% year-over-year in Q1 to 3.9 GWh, the highest level of deployments achieved due to the ongoing Megafactory ramp. Solar deployments increased by 40% year-over-year in Q1 to 67 MW.\nAll of these responses are simply rephrasings and synthesis of information that’s directly in the PDF. But what’s useful about it is the LLM is able to generate a natural language answer to the specific question asked, using the information we provide it.\nBuilding the bot The code leading up to the point where we have our bot object is only ~30 lines. I encourage you to open it in Colab and play around.\nFirst we import what we’ll need:\nfrom langchain.document_loaders import PyPDFLoader from langchain.text_splitter import RecursiveCharacterTextSplitter from langchain.embeddings.openai import OpenAIEmbeddings from langchain.vectorstores import Chroma from langchain.chains import ConversationalRetrievalChain from langchain.text_splitter import CharacterTextSplitter from langchain.llms import OpenAI Next we load the PDF and split it into manageable chunks:\n# Load the 2023 Q1 Tesla Quarterly update PDF financial_report_pdf = \"https://digitalassets.tesla.com/tesla-contents/image/upload/IR/TSLA-Q1-2023-Update\" loader = PyPDFLoader(financial_report_pdf) documents = loader.load() # Chunk the financial report text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0) docs = text_splitter.split_documents(documents) We’ll then need to set up our credentials. Here I use getpass to prompt you for the value, but if you’re running this locally, this could also come from an environment variable:\n# You'll need to provide your OpenAI API key for computing the embeddings. from getpass import getpass OPENAI_API_KEY = getpass('Enter your OpenAI API key: ') We can then embed all of the documents using OpenAI embeddings, and store these in an in-memory vector database. OpenAI offers an API that uses one of their LLMs to encode the text into a high dimensional embedding vector space. Text that discusses similar material will exist nearby (as measured by cosine distance) in the embedding space. The vector database handles finding text that is semantically related to our question, hopefully including text that has enough information to answer it. Then we’ll use OpenAI’s LLM again to generate an answer.\nembeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY) # Save the financial report into the Chroma vector database vectorstore = Chroma.from_documents(docs, embeddings) We can then create the final chain:\n# Create the chain qa = ConversationalRetrievalChain.from_llm( llm=OpenAI(temperature=0, openai_api_key=OPENAI_API_KEY), retriever=vectorstore.as_retriever(), return_source_documents=True) Which we can interact with using this little Chatbot class:\n# Create a little chat bot class and an instance class Chatbot: def __init__(self): self.chat_history = [] def ask(self, question): result = qa({\"question\": question, \"chat_history\": self.chat_history}) answer = result[\"answer\"].strip() self.chat_history.append((question, answer)) print(\"\\n\".join(answer)) bot = Chatbot() What’s going on under the hood? Essentially all the functionality of the bot is handled by the ConversationalRetrievalChain instance from LangChain. But I feel it’s instructive to know what’s really happening.\nWe start with a question and a chat history. I purposely make the question a followup question that can only be answered only in the context of the previous question. This way we can see how the model uses the chat history:\ninputs = { \"question\": \"How's that going?\", \"chat_history\": [(\"Where is the Cybertruck going to be manufactured?\", \"The Cybertruck will be manufactured at Gigafactory Texas.\")] } We turn the history into a single piece of text:\nhist_text = \"\" for turn in inputs[\"chat_history\"]: hist_text += f\"\\nHuman: {turn[0]}\\nAssistant: {turn[1]}\" print(hist_text) This gives us the following text:\nHuman: Where is the Cybertruck going to be manufactured? Assistant: The Cybertruck will be manufactured at Gigafactory Texas.\nFirst we want to combine our question and history so that followup questions can be rephrased into a standalone question. LangChain contains many internal prompts that facilitate this sort of action. Our chatbot uses this prompt internally:\n_template = \"\"\" Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question. Chat History: {chat_history} Follow Up Input: {question} Standalone question:\"\"\" from langchain.prompts.prompt import PromptTemplate condense_question_prompt = PromptTemplate.from_template(_template) Like above, we’re going to be using OpenAI’s LLM for the various tasks\nllm = OpenAI(temperature=0, openai_api_key=OPENAI_API_KEY) We can then create a chain that will combine our question and history. Using our prompt from above, the LLM is asked to generate a new question based on the input question and our history text.\nfrom langchain.chains.llm import LLMChain question_generator = LLMChain(llm=llm, prompt=condense_question_prompt) question = inputs[\"question\"] new_question = question_generator.run(question=question, chat_history=hist_text) print(new_question) You’ll notice it completely ignores our chat history because it’s irrelevant to the question at hand:\nHow is the manufacturing of the Cybertruck at Gigafactory Texas progressing?\nNext we identify relevant documents for answering this question using Chroma\nretriever = vectorstore.as_retriever() retrieved_docs = retriever.get_relevant_documents(new_question) print(len(retrieved_docs)) We received four relevant documents:\n4\nWe then use a very simple template to render each document that just returns the page_content.\ndoc_prompt = PromptTemplate(input_variables=[\"page_content\"], template=\"{page_content}\") new_inputs = {\"question\": new_question, \"chat_history\": hist_text} def format_doc(doc): return doc_prompt.format(page_content=doc.page_content) doc_strings = [format_doc(doc) for doc in retrieved_docs] context_inputs = {'context': \"\\n\\n\".join(doc_strings), 'question': new_inputs[\"question\"]} Now we’re ready to answer the question. We ask for an answer that incorporates the context.\nprompt_template = \"\"\"Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer. {context} Question: {question} Helpful Answer:\"\"\" context_prompt = PromptTemplate(template=prompt_template, input_variables=[\"context\", \"question\"]) We make a chain using the OpenAI LLM and our prompt we just made. And then we use the LLM to get a continuation, hopefully with our answer.\nllm_chain = LLMChain(llm=llm, prompt=context_prompt) answer = llm_chain.predict(**context_inputs) print(answer.strip()) And we can see, that even though we only asked, “How’s it going?” The LLM was able to use our rephrased question to find relevant documents and turn those into a pretty good answer:\nThe factory in Germany is currently producing over 5,000 vehicles per week.\nConclusion I hope this illustrates that the task of creating a chatbot that can answer questions about a set of documents is really very straightforward, and mainly involves how the task can be broken down into a succession of prompts that the LLM will generate useful continuations for.\n",
+  "wordCount" : "1283",
+  "inLanguage": "en",
+  "datePublished": "2023-05-05T09:23:51-04:00",
+  "dateModified": "2023-05-05T09:23:51-04:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://kbullaughey.github.io/posts/chat-with-tesla-earnings-deck/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI learnings",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://kbullaughey.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://kbullaughey.github.io" accesskey="h" title="AI learnings (Alt + H)">AI learnings</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Chat with Tesla Earnings Deck
+    </h1>
+    <div class="post-meta"><span title='2023-05-05 09:23:51 -0400 EDT'>May 5, 2023</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>Since LangChain seems like a fairly powerful way to recursively call OpenAI LLMs, I wanted to understand how this dark magic worked.
+I came accross this <a href="https://gist.github.com/virattt/656ad37ecb11244b22834cdf2649d173">gist</a> by <a href="https://twitter.com/virattt">@virattt</a> where
+he creates a simple chatbot to chat with a Facebook earnings PDF. This seemed like a good place to start.</p>
+<p>I created my own <a href="https://gist.github.com/kbullaughey/f39ab3e67bbc32c8cdd9fa6c59d83f63">adaptation</a> that reproduces the simple chatbot, but
+this time talking with the Tesla Q1 2023 earnings deck. I then extend his example in the last section by showing what&rsquo;s happening under the hood inside LangChain. Hopefully this will provide some intuition for how LangChain works and how powerful simple recursive prompting with a language model can be, particularly when combined with some outside tools (like a vector embedding database).</p>
+<p>But before we dive in, let&rsquo;s see what it can do.</p>
+<p>We can ask it any question we suspect will be answerable in the <a href="https://digitalassets.tesla.com/tesla-contents/image/upload/IR/TSLA-Q1-2023-Update">Tesla 2023 Q1 earnings deck</a>.
+For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>bot<span style="color:#f92672">.</span>ask(<span style="color:#e6db74">&#34;What was Tesla&#39;s revenue in the latest quarter?&#34;</span>)
+</span></span></code></pre></div><p>To which we get this reply:</p>
+<blockquote>
+<p>Tesla&rsquo;s revenue in the latest quarter was $23.3 billion.</p>
+</blockquote>
+<p>Or we can ask it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>bot<span style="color:#f92672">.</span>ask(<span style="color:#e6db74">&#34;What was net income in the latest quarter?&#34;</span>)
+</span></span></code></pre></div><p>And the bot tells us this:</p>
+<blockquote>
+<p>Tesla&rsquo;s net income in the latest quarter was $2.5B GAAP net income.</p>
+</blockquote>
+<p>Or we can ask more open ended questions, like this one:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>bot<span style="color:#f92672">.</span>ask(<span style="color:#e6db74">&#34;What progress was there on full self driving during the quarter?&#34;</span>)
+</span></span></code></pre></div><p>And we get this short statement:</p>
+<blockquote>
+<p>Tesla enabled the latest FSD Beta software stack for highway driving in the latest quarter.</p>
+</blockquote>
+<p>And if we want to know more about FSD progress:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>bot<span style="color:#f92672">.</span>ask(<span style="color:#e6db74">&#34;How many miles have been driven on FSD to date?&#34;</span>)
+</span></span></code></pre></div><p>To which the bot responds:</p>
+<blockquote>
+<p>Over 150 million miles.</p>
+</blockquote>
+<p>Sometimes we get longer answers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>bot<span style="color:#f92672">.</span>ask(<span style="color:#e6db74">&#34;Can you describe how the energy business has been growing?&#34;</span>)
+</span></span></code></pre></div><p>Such as this response:</p>
+<blockquote>
+<p>Energy storage deployments increased by 360% year-over-year in Q1 to 3.9 GWh,
+the highest level of deployments achieved due to the ongoing Megafactory ramp.
+Solar deployments increased by 40% year-over-year in Q1 to 67 MW.</p>
+</blockquote>
+<p>All of these responses are simply rephrasings and synthesis of information that&rsquo;s directly in the PDF. But what&rsquo;s useful about it is the LLM is able to generate a natural language answer to the specific question asked, using the information we provide it.</p>
+<h2 id="building-the-bot">Building the bot<a hidden class="anchor" aria-hidden="true" href="#building-the-bot">#</a></h2>
+
+
+<a href="https://colab.research.google.com/gist/kbullaughey/f39ab3e67bbc32c8cdd9fa6c59d83f63/tesla_chatbot_financial_report.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+
+
+<p>The code leading up to the point where we have our <code>bot</code> object is only ~30 lines. I encourage you to open it in Colab and play around.</p>
+<p>First we import what we&rsquo;ll need:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.document_loaders <span style="color:#f92672">import</span> PyPDFLoader
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.text_splitter <span style="color:#f92672">import</span> RecursiveCharacterTextSplitter
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.embeddings.openai <span style="color:#f92672">import</span> OpenAIEmbeddings
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.vectorstores <span style="color:#f92672">import</span> Chroma
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chains <span style="color:#f92672">import</span> ConversationalRetrievalChain
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.text_splitter <span style="color:#f92672">import</span> CharacterTextSplitter
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.llms <span style="color:#f92672">import</span> OpenAI
+</span></span></code></pre></div><p>Next we load the PDF and split it into manageable chunks:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span><span style="color:#75715e"># Load the 2023 Q1 Tesla Quarterly update PDF</span>
+</span></span><span style="display:flex;"><span>financial_report_pdf <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://digitalassets.tesla.com/tesla-contents/image/upload/IR/TSLA-Q1-2023-Update&#34;</span>
+</span></span><span style="display:flex;"><span>loader <span style="color:#f92672">=</span> PyPDFLoader(financial_report_pdf)
+</span></span><span style="display:flex;"><span>documents <span style="color:#f92672">=</span> loader<span style="color:#f92672">.</span>load()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Chunk the financial report</span>
+</span></span><span style="display:flex;"><span>text_splitter <span style="color:#f92672">=</span> RecursiveCharacterTextSplitter(chunk_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1000</span>, chunk_overlap<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>docs <span style="color:#f92672">=</span> text_splitter<span style="color:#f92672">.</span>split_documents(documents)
+</span></span></code></pre></div><p>We&rsquo;ll then need to set up our credentials. Here I use <code>getpass</code> to prompt you for the value, but if you&rsquo;re running this locally, this could also come from
+an environment variable:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span><span style="color:#75715e"># You&#39;ll need to provide your OpenAI API key for computing the embeddings.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> getpass <span style="color:#f92672">import</span> getpass
+</span></span><span style="display:flex;"><span>OPENAI_API_KEY <span style="color:#f92672">=</span> getpass(<span style="color:#e6db74">&#39;Enter your OpenAI API key: &#39;</span>)
+</span></span></code></pre></div><p>We can then embed all of the documents using OpenAI embeddings, and store these in an in-memory vector database. OpenAI offers an API that uses one of their LLMs to encode the text into a high dimensional embedding vector space. Text that discusses similar material will exist nearby (as measured by cosine distance) in the embedding space. The vector database handles finding text that is semantically related to our question, hopefully including text that has enough information to answer it. Then we&rsquo;ll use OpenAI&rsquo;s LLM again to generate an answer.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>embeddings <span style="color:#f92672">=</span> OpenAIEmbeddings(openai_api_key<span style="color:#f92672">=</span>OPENAI_API_KEY)
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Save the financial report into the Chroma vector database</span>
+</span></span><span style="display:flex;"><span>vectorstore <span style="color:#f92672">=</span> Chroma<span style="color:#f92672">.</span>from_documents(docs, embeddings)
+</span></span></code></pre></div><p>We can then create the final chain:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span><span style="color:#75715e"># Create the chain</span>
+</span></span><span style="display:flex;"><span>qa <span style="color:#f92672">=</span> ConversationalRetrievalChain<span style="color:#f92672">.</span>from_llm(
+</span></span><span style="display:flex;"><span>    llm<span style="color:#f92672">=</span>OpenAI(temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, openai_api_key<span style="color:#f92672">=</span>OPENAI_API_KEY), 
+</span></span><span style="display:flex;"><span>    retriever<span style="color:#f92672">=</span>vectorstore<span style="color:#f92672">.</span>as_retriever(),
+</span></span><span style="display:flex;"><span>    return_source_documents<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>)
+</span></span></code></pre></div><p>Which we can interact with using this little Chatbot class:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span><span style="color:#75715e"># Create a little chat bot class and an instance</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Chatbot</span>:
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">def</span> __init__(self):
+</span></span><span style="display:flex;"><span>    self<span style="color:#f92672">.</span>chat_history <span style="color:#f92672">=</span> []
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">def</span> <span style="color:#a6e22e">ask</span>(self, question):
+</span></span><span style="display:flex;"><span>    result <span style="color:#f92672">=</span> qa({<span style="color:#e6db74">&#34;question&#34;</span>: question, <span style="color:#e6db74">&#34;chat_history&#34;</span>: self<span style="color:#f92672">.</span>chat_history})
+</span></span><span style="display:flex;"><span>    answer <span style="color:#f92672">=</span> result[<span style="color:#e6db74">&#34;answer&#34;</span>]<span style="color:#f92672">.</span>strip()
+</span></span><span style="display:flex;"><span>    self<span style="color:#f92672">.</span>chat_history<span style="color:#f92672">.</span>append((question, answer))
+</span></span><span style="display:flex;"><span>    print(<span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join(answer))
+</span></span><span style="display:flex;"><span>bot <span style="color:#f92672">=</span> Chatbot()
+</span></span></code></pre></div><h2 id="whats-going-on-under-the-hood">What&rsquo;s going on under the hood?<a hidden class="anchor" aria-hidden="true" href="#whats-going-on-under-the-hood">#</a></h2>
+<p>Essentially all the functionality of the bot is handled by the <code>ConversationalRetrievalChain</code> instance from LangChain. But I feel it&rsquo;s instructive to know what&rsquo;s really happening.</p>
+<p>We start with a question and a chat history. I purposely make the question a followup question that can only be answered only in the context of the previous
+question. This way we can see how the model uses the chat history:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>inputs <span style="color:#f92672">=</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;question&#34;</span>: <span style="color:#e6db74">&#34;How&#39;s that going?&#34;</span>, 
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;chat_history&#34;</span>: [(<span style="color:#e6db74">&#34;Where is the Cybertruck going to be manufactured?&#34;</span>, <span style="color:#e6db74">&#34;The Cybertruck will be manufactured at Gigafactory Texas.&#34;</span>)]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>We turn the history into a single piece of text:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>hist_text <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">for</span> turn <span style="color:#f92672">in</span> inputs[<span style="color:#e6db74">&#34;chat_history&#34;</span>]:
+</span></span><span style="display:flex;"><span>  hist_text <span style="color:#f92672">+=</span> <span style="color:#e6db74">f</span><span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Human: </span><span style="color:#e6db74">{</span>turn[<span style="color:#ae81ff">0</span>]<span style="color:#e6db74">}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Assistant: </span><span style="color:#e6db74">{</span>turn[<span style="color:#ae81ff">1</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>print(hist_text)
+</span></span></code></pre></div><p>This gives us the following text:</p>
+<blockquote>
+<p>Human: Where is the Cybertruck going to be manufactured? <br>
+Assistant: The Cybertruck will be manufactured at Gigafactory Texas.</p>
+</blockquote>
+<p>First we want to combine our question and history so that followup questions can be rephrased into a standalone question.
+LangChain contains many internal prompts that facilitate this sort of action. Our chatbot uses this prompt internally:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>_template <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Given the following conversation and a follow up question, rephrase the
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">follow up question to be a standalone question.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Chat History:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{chat_history}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Follow Up Input: </span><span style="color:#e6db74">{question}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Standalone question:&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.prompts.prompt <span style="color:#f92672">import</span> PromptTemplate
+</span></span><span style="display:flex;"><span>condense_question_prompt <span style="color:#f92672">=</span> PromptTemplate<span style="color:#f92672">.</span>from_template(_template)
+</span></span></code></pre></div><p>Like above, we&rsquo;re going to be using OpenAI&rsquo;s LLM for the various tasks</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>llm <span style="color:#f92672">=</span> OpenAI(temperature<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>, openai_api_key<span style="color:#f92672">=</span>OPENAI_API_KEY)
+</span></span></code></pre></div><p>We can then create a chain that will combine our question and history.
+Using our prompt from above, the LLM is asked to generate a new question based on the input question and our history text.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span><span style="color:#f92672">from</span> langchain.chains.llm <span style="color:#f92672">import</span> LLMChain
+</span></span><span style="display:flex;"><span>question_generator <span style="color:#f92672">=</span> LLMChain(llm<span style="color:#f92672">=</span>llm, prompt<span style="color:#f92672">=</span>condense_question_prompt)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>question <span style="color:#f92672">=</span> inputs[<span style="color:#e6db74">&#34;question&#34;</span>]
+</span></span><span style="display:flex;"><span>new_question <span style="color:#f92672">=</span> question_generator<span style="color:#f92672">.</span>run(question<span style="color:#f92672">=</span>question, chat_history<span style="color:#f92672">=</span>hist_text)
+</span></span><span style="display:flex;"><span>print(new_question)
+</span></span></code></pre></div><p>You&rsquo;ll notice it completely ignores our chat history because it&rsquo;s irrelevant to the question at hand:</p>
+<blockquote>
+<p>How is the manufacturing of the Cybertruck at Gigafactory Texas progressing?</p>
+</blockquote>
+<p>Next we identify relevant documents for answering this question using Chroma</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>retriever <span style="color:#f92672">=</span> vectorstore<span style="color:#f92672">.</span>as_retriever()
+</span></span><span style="display:flex;"><span>retrieved_docs <span style="color:#f92672">=</span> retriever<span style="color:#f92672">.</span>get_relevant_documents(new_question)
+</span></span><span style="display:flex;"><span>print(len(retrieved_docs))
+</span></span></code></pre></div><p>We received four relevant documents:</p>
+<blockquote>
+<p>4</p>
+</blockquote>
+<p>We then use a very simple template to render each document that just returns the <code>page_content</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>doc_prompt <span style="color:#f92672">=</span> PromptTemplate(input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;page_content&#34;</span>], template<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">{page_content}</span><span style="color:#e6db74">&#34;</span>)
+</span></span><span style="display:flex;"><span>new_inputs <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#34;question&#34;</span>: new_question, <span style="color:#e6db74">&#34;chat_history&#34;</span>: hist_text}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">def</span> <span style="color:#a6e22e">format_doc</span>(doc):
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">return</span> doc_prompt<span style="color:#f92672">.</span>format(page_content<span style="color:#f92672">=</span>doc<span style="color:#f92672">.</span>page_content)
+</span></span><span style="display:flex;"><span>doc_strings <span style="color:#f92672">=</span> [format_doc(doc) <span style="color:#66d9ef">for</span> doc <span style="color:#f92672">in</span> retrieved_docs]
+</span></span><span style="display:flex;"><span>context_inputs <span style="color:#f92672">=</span> {<span style="color:#e6db74">&#39;context&#39;</span>: <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span><span style="color:#f92672">.</span>join(doc_strings), <span style="color:#e6db74">&#39;question&#39;</span>: new_inputs[<span style="color:#e6db74">&#34;question&#34;</span>]}
+</span></span></code></pre></div><p>Now we&rsquo;re ready to answer the question. We ask for an answer that incorporates the context.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>prompt_template <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&#34;&#34;Use the following pieces of context to answer the question at the end. 
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">If you don&#39;t know the answer, just say that you don&#39;t know, don&#39;t try to make up an answer.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74"></span><span style="color:#e6db74">{context}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Question: </span><span style="color:#e6db74">{question}</span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Helpful Answer:&#34;&#34;&#34;</span>
+</span></span><span style="display:flex;"><span>context_prompt <span style="color:#f92672">=</span> PromptTemplate(template<span style="color:#f92672">=</span>prompt_template, input_variables<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#34;context&#34;</span>, <span style="color:#e6db74">&#34;question&#34;</span>])
+</span></span></code></pre></div><p>We make a chain using the OpenAI LLM and our prompt we just made.
+And then we use the LLM to get a continuation, hopefully with our answer.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py3" data-lang="py3"><span style="display:flex;"><span>llm_chain <span style="color:#f92672">=</span> LLMChain(llm<span style="color:#f92672">=</span>llm, prompt<span style="color:#f92672">=</span>context_prompt)
+</span></span><span style="display:flex;"><span>answer <span style="color:#f92672">=</span> llm_chain<span style="color:#f92672">.</span>predict(<span style="color:#f92672">**</span>context_inputs)
+</span></span><span style="display:flex;"><span>print(answer<span style="color:#f92672">.</span>strip())
+</span></span></code></pre></div><p>And we can see, that even though we only asked, &ldquo;How&rsquo;s it going?&rdquo; The LLM was able to use our rephrased question to find relevant documents and turn those into a pretty good answer:</p>
+<blockquote>
+<p>The factory in Germany is currently producing over 5,000 vehicles per week.</p>
+</blockquote>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>I hope this illustrates that the task of creating a chatbot that can answer questions about a set of documents is really very straightforward, and mainly involves how the task can be broken down into a succession of prompts that the LLM will generate useful continuations for.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://kbullaughey.github.io">AI learnings</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
