@@ -6,7 +6,17 @@
     <description>Recent content in Posts on AI learnings</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 05 May 2023 09:23:51 -0400</lastBuildDate><atom:link href="https://kbullaughey.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 02 Jun 2023 13:49:45 -0400</lastBuildDate><atom:link href="https://kbullaughey.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Trying Out Meta Massively Multilingual Speech Model</title>
+      <link>https://kbullaughey.github.io/posts/trying-out-meta-massively-multilingual-speech-model/</link>
+      <pubDate>Fri, 02 Jun 2023 13:49:45 -0400</pubDate>
+      
+      <guid>https://kbullaughey.github.io/posts/trying-out-meta-massively-multilingual-speech-model/</guid>
+      <description>Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI&amp;rsquo;s Whisper model.
+For text-to-speech capabilities, the model actually reuses another library in Meta&amp;rsquo;s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.</description>
+    </item>
+    
     <item>
       <title>LangChain demo: Chat with Tesla Earnings Deck</title>
       <link>https://kbullaughey.github.io/posts/chat-with-tesla-earnings-deck/</link>

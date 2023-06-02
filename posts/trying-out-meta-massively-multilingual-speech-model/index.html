@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Trying Out Meta Massively Multilingual Speech Model | AI learnings</title>
+<meta name="keywords" content="">
+<meta name="description" content="Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI&rsquo;s Whisper model.
+For text-to-speech capabilities, the model actually reuses another library in Meta&rsquo;s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.">
+<meta name="author" content="">
+<link rel="canonical" href="https://kbullaughey.github.io/posts/trying-out-meta-massively-multilingual-speech-model/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.04b37ae66f621733f5ee925c7ae5c8e61060be020a04a41396a1e1b1d9641234.css" integrity="sha256-BLN65m9iFzP17pJceuXI5hBgvgIKBKQTlqHhsdlkEjQ=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://kbullaughey.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://kbullaughey.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://kbullaughey.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://kbullaughey.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://kbullaughey.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2JCF88PF29"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-2JCF88PF29', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Trying Out Meta Massively Multilingual Speech Model" />
+<meta property="og:description" content="Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI&rsquo;s Whisper model.
+For text-to-speech capabilities, the model actually reuses another library in Meta&rsquo;s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://kbullaughey.github.io/posts/trying-out-meta-massively-multilingual-speech-model/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-06-02T13:49:45-04:00" />
+<meta property="article:modified_time" content="2023-06-02T13:49:45-04:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Trying Out Meta Massively Multilingual Speech Model"/>
+<meta name="twitter:description" content="Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI&rsquo;s Whisper model.
+For text-to-speech capabilities, the model actually reuses another library in Meta&rsquo;s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Posts",
+      "item": "https://kbullaughey.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  3 ,
+      "name": "Trying Out Meta Massively Multilingual Speech Model",
+      "item": "https://kbullaughey.github.io/posts/trying-out-meta-massively-multilingual-speech-model/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Trying Out Meta Massively Multilingual Speech Model",
+  "name": "Trying Out Meta Massively Multilingual Speech Model",
+  "description": "Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI\u0026rsquo;s Whisper model.\nFor text-to-speech capabilities, the model actually reuses another library in Meta\u0026rsquo;s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI’s Whisper model.\nFor text-to-speech capabilities, the model actually reuses another library in Meta’s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.\nFor the purposes of testing TTS in English I asked ChatGPT for a joke:\nA robot walks into a bar and sits down. The bartender says, “We don’t serve robots here.” The robot replies, “Oh, don’t worry, I’m not here to drink. I just came to charge my batteries.”\nHere’s the MMS audio using the single-voice model, which I generated using this Colab notebook, which I adapted from their original notebook:\nYour browser does not support the audio element. The prosody doesn’t seem very natural. Let’s compare it to the original VITS model:\nYour browser does not support the audio element. I think the VITS model is actually quite a bit better. Perhaps making the model massively multilingual causes it to have less fidelity in English.\nWe can also generate the same joke using the different speakers from the VITS multi-speaker model. I’m not sure how many voices there are, but here are the first 20:\nYour browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. I asked it to generate all of these in parallel, and so the shorter ones initially had padding at the end that sounds like a buzz, which I manually trimmed.\n",
+  "wordCount" : "442",
+  "inLanguage": "en",
+  "datePublished": "2023-06-02T13:49:45-04:00",
+  "dateModified": "2023-06-02T13:49:45-04:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://kbullaughey.github.io/posts/trying-out-meta-massively-multilingual-speech-model/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "AI learnings",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://kbullaughey.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://kbullaughey.github.io" accesskey="h" title="AI learnings (Alt + H)">AI learnings</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Trying Out Meta Massively Multilingual Speech Model
+    </h1>
+    <div class="post-meta"><span title='2023-06-02 13:49:45 -0400 EDT'>June 2, 2023</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>Back in May (2023), Meta released their <a href="https://ai.facebook.com/blog/multilingual-model-speech-recognition/">Massively Multilingual Speech Model</a> [<a href="https://github.com/facebookresearch/fairseq/tree/main/examples/mms">github</a>]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI&rsquo;s Whisper model.</p>
+<p>For text-to-speech capabilities, the model actually reuses another library in Meta&rsquo;s Fairseq toolkit, <a href="https://github.com/jaywalnut310/vits">VITS</a>, which was released back in June of 2021. VITS came with some pretty impressive
+<a href="https://jaywalnut310.github.io/vits-demo/index.html">TTS demos</a>, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.</p>
+<p>For the purposes of testing TTS in English I asked ChatGPT for a joke:</p>
+<blockquote>
+<p>A robot walks into a bar and sits down. The bartender says, &ldquo;We don&rsquo;t serve robots here.&rdquo; The robot replies, &ldquo;Oh, don&rsquo;t worry, I&rsquo;m not here to drink. I just came to charge my batteries.&rdquo;</p>
+</blockquote>
+<p>Here&rsquo;s the MMS audio using the single-voice model, which I generated using <a href="https://drive.google.com/file/d/1-45L6xS4aVrwpsfdYRlRttiwtmWJehYK/view?usp=sharing">this Colab notebook</a>, which I adapted from their original <a href="https://colab.research.google.com/github/facebookresearch/fairseq/blob/main/examples/mms/tts/tutorial/MMS_TTS_Inference_Colab.ipynb">notebook</a>:</p>
+<audio controls>
+  <source src="/audio/robot-joke-mms-0.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>The prosody doesn&rsquo;t seem very natural. Let&rsquo;s compare it to the original VITS model:</p>
+<audio controls>
+  <source src="/audio/robot-joke-0.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>I think the VITS model is actually quite a bit better. Perhaps making the model massively multilingual causes it to have less fidelity in English.</p>
+<p>We can also generate the same joke using the different speakers from the VITS multi-speaker model. I&rsquo;m not sure how many voices there are, but here are the first 20:</p>
+<p><audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-0.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-1.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-2b.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-3.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-4.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-5.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-6.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-7.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-8.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-9b.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-10.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-11.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-12.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-13.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-14.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-15.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-16.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-17.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-18.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-19.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+</p>
+<p>I asked it to generate all of these in parallel, and so the shorter ones initially had padding at the end that sounds like a buzz, which I manually trimmed.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="https://kbullaughey.github.io">AI learnings</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
