@@ -110,8 +110,8 @@ For text-to-speech capabilities, the model actually reuses another library in Me
   "keywords": [
     
   ],
-  "articleBody": "Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI’s Whisper model.\nFor text-to-speech capabilities, the model actually reuses another library in Meta’s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.\nFor the purposes of testing TTS in English I asked ChatGPT for a joke:\nA robot walks into a bar and sits down. The bartender says, “We don’t serve robots here.” The robot replies, “Oh, don’t worry, I’m not here to drink. I just came to charge my batteries.”\nHere’s the MMS audio using the single-voice model, which I generated using this Colab notebook, which I adapted from their original notebook:\nYour browser does not support the audio element. The prosody doesn’t seem very natural. Let’s compare it to the original VITS model:\nYour browser does not support the audio element. I think the VITS model is actually quite a bit better. Perhaps making the model massively multilingual causes it to have less fidelity in English.\nWe can also generate the same joke using the different speakers from the VITS multi-speaker model. I’m not sure how many voices there are, but here are the first 20:\nYour browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. I asked it to generate all of these in parallel, and so the shorter ones initially had padding at the end that sounds like a buzz, which I manually trimmed.\n",
-  "wordCount" : "442",
+  "articleBody": "Back in May (2023), Meta released their Massively Multilingual Speech Model [github]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI’s Whisper model.\nFor text-to-speech capabilities, the model actually reuses another library in Meta’s Fairseq toolkit, VITS, which was released back in June of 2021. VITS came with some pretty impressive TTS demos, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.\nUnfortunately the MMS TTS model doesn’t generate Chinese or Japanese. The only other language it generates that I am familiar with is French. Here’s a short story in French from ChatGPT:\nUn garçon nommé Thomas découvre une boîte mystérieuse dans son jardin. En l’ouvrant, il trouve une lettre qui révèle qu’il est en réalité un robot créé par ses parents ingénieurs. Au début choqué, Thomas accepte finalement sa véritable identité et décide de vivre sa vie en embrassant sa nature de robot. Il devient un modèle pour les autres en prouvant que l’acceptation de soi est essentielle, peu importe notre apparence ou notre origine.\nAnd here’s the audio French model it generated:\nYour browser does not support the audio element. The largest problem in my mind is that it ignores commas and has otherwise somewhat unnatural prosody. The pronunciation seems decent and rather human like. It’s also doing a nice job eliding words together which is very typical in French.\nFor the purposes of testing TTS in English I asked ChatGPT for a joke:\nA robot walks into a bar and sits down. The bartender says, “We don’t serve robots here.” The robot replies, “Oh, don’t worry, I’m not here to drink. I just came to charge my batteries.”\nHere’s the MMS audio using the single-voice model, which I generated using this Colab notebook, which I adapted from their original notebook:\nYour browser does not support the audio element. The prosody doesn’t seem very natural. Let’s compare it to the original VITS model:\nYour browser does not support the audio element. I think the VITS model is actually quite a bit better. Perhaps making the model massively multilingual causes it to have less fidelity in English.\nWe can also generate the same joke using the different speakers from the VITS multi-speaker model. Based on the model config file it looks like there may be 109 speakers. Here are the first 20:\nYour browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. I asked it to generate all of these in parallel, and so the shorter ones initially had padding at the end that sounds like a buzz, which I manually trimmed.\nTo me they sound a bit like most of them have Indian accents. I’m not sure why.\nHere are the next 20 voices:\nYour browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. Your browser does not support the audio element. I was curious if there was something about the text I choose that resulted in worse quality TTS. So here I use some new text:\nI tried generating some more speech with this text with voice 77, which from their voice conversion demo sounded pretty good.\nNatural selection is a fundamental concept in evolutionary biology proposed by Charles Darwin. It refers to the process by which certain heritable traits become more or less common in a population over successive generations due to their impact on reproductive success.\nYour browser does not support the audio element. And here’s the robot joke with the same voice (77):\nYour browser does not support the audio element. It’s strange, because the natural selection passage is quite a bit more clearly enunciated compared to the robot joke.\nHere’s another example of voice 77:\nThe three-body problem is a famous problem in classical mechanics that deals with predicting the motion of three celestial bodies under their mutual gravitational influence. It refers to the challenge of determining the exact positions and velocities of three point masses, such as stars or planets, at any given time, based on their initial conditions and the laws of motion and gravity.\nYour browser does not support the audio element. Here’s another example:\nCurds are the solid part of cheese formed when milk coagulates, while whey is the liquid left after the curds are removed.\nYour browser does not support the audio element. How does it do with a very short example?\nA penny saved is a penny earned.\nYour browser does not support the audio element. ",
+  "wordCount" : "1055",
   "inLanguage": "en",
   "datePublished": "2023-06-02T13:49:45-04:00",
   "dateModified": "2023-06-02T13:49:45-04:00",
@@ -189,6 +189,17 @@ For text-to-speech capabilities, the model actually reuses another library in Me
   <div class="post-content"><p>Back in May (2023), Meta released their <a href="https://ai.facebook.com/blog/multilingual-model-speech-recognition/">Massively Multilingual Speech Model</a> [<a href="https://github.com/facebookresearch/fairseq/tree/main/examples/mms">github</a>]. This model is significant because it includes 1,107 languages, including a vast number of low resource languages. And supposedly it has lower error rates for transcription than OpenAI&rsquo;s Whisper model.</p>
 <p>For text-to-speech capabilities, the model actually reuses another library in Meta&rsquo;s Fairseq toolkit, <a href="https://github.com/jaywalnut310/vits">VITS</a>, which was released back in June of 2021. VITS came with some pretty impressive
 <a href="https://jaywalnut310.github.io/vits-demo/index.html">TTS demos</a>, and so I wanted to see how well they worked in my own hands and compare the new MMS and the older VITS models.</p>
+<p>Unfortunately the MMS TTS model doesn&rsquo;t generate Chinese or Japanese. The only other language it generates that I am familiar with is French. Here&rsquo;s a short story in French from ChatGPT:</p>
+<blockquote>
+<p>Un garçon nommé Thomas découvre une boîte mystérieuse dans son jardin. En l&rsquo;ouvrant, il trouve une lettre qui révèle qu&rsquo;il est en réalité un robot créé par ses parents ingénieurs. Au début choqué, Thomas accepte finalement sa véritable identité et décide de vivre sa vie en embrassant sa nature de robot. Il devient un modèle pour les autres en prouvant que l&rsquo;acceptation de soi est essentielle, peu importe notre apparence ou notre origine.</p>
+</blockquote>
+<p>And here&rsquo;s the audio French model it generated:</p>
+<audio controls>
+  <source src="/audio/french-story-0.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>The largest problem in my mind is that it ignores commas and has otherwise somewhat unnatural prosody. The pronunciation seems decent and rather human like. It&rsquo;s also doing a nice job eliding words together which is very typical in French.</p>
 <p>For the purposes of testing TTS in English I asked ChatGPT for a joke:</p>
 <blockquote>
 <p>A robot walks into a bar and sits down. The bartender says, &ldquo;We don&rsquo;t serve robots here.&rdquo; The robot replies, &ldquo;Oh, don&rsquo;t worry, I&rsquo;m not here to drink. I just came to charge my batteries.&rdquo;</p>
@@ -206,7 +217,7 @@ For text-to-speech capabilities, the model actually reuses another library in Me
 </audio>
 
 <p>I think the VITS model is actually quite a bit better. Perhaps making the model massively multilingual causes it to have less fidelity in English.</p>
-<p>We can also generate the same joke using the different speakers from the VITS multi-speaker model. I&rsquo;m not sure how many voices there are, but here are the first 20:</p>
+<p>We can also generate the same joke using the different speakers from the VITS multi-speaker model. Based on the model config file it looks like there may be 109 speakers. Here are the first 20:</p>
 <p><audio controls>
   <source src="/audio/robot-joke-ms/robot-joke-ms-0.wav" type="audio/wav">
   Your browser does not support the audio element.
@@ -308,6 +319,154 @@ For text-to-speech capabilities, the model actually reuses another library in Me
 </audio>
 </p>
 <p>I asked it to generate all of these in parallel, and so the shorter ones initially had padding at the end that sounds like a buzz, which I manually trimmed.</p>
+<p>To me they sound a bit like most of them have Indian accents. I&rsquo;m not sure why.</p>
+<p>Here are the next 20 voices:</p>
+<p><audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-20.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-21.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-22.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-23.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-24.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-25.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-26.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-27.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-28.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-29.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-30.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-31.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-32.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-33.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-34.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-35.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-36.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-37.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-38.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-39.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+</p>
+<p>I was curious if there was something about the text I choose that resulted in worse quality TTS. So here I use some new text:</p>
+<p>I tried generating some more speech with this text with voice 77, which from their voice conversion demo sounded pretty good.</p>
+<blockquote>
+<p>Natural selection is a fundamental concept in evolutionary biology proposed by Charles Darwin.
+It refers to the process by which certain heritable traits become more or less common in a
+population over successive generations due to their impact on reproductive success.</p>
+</blockquote>
+<audio controls>
+  <source src="/audio/natural_selection-77.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>And here&rsquo;s the robot joke with the same voice (77):</p>
+<audio controls>
+  <source src="/audio/robot-joke-ms/robot-joke-ms-77.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>It&rsquo;s strange, because the natural selection passage is quite a bit more clearly enunciated compared to the robot joke.</p>
+<p>Here&rsquo;s another example of voice 77:</p>
+<blockquote>
+<p>The three-body problem is a famous problem in classical mechanics that deals with predicting the motion of three celestial bodies under their mutual gravitational influence. It refers to the challenge of determining the exact positions and velocities of three point masses, such as stars or planets, at any given time, based on their initial conditions and the laws of motion and gravity.</p>
+</blockquote>
+<audio controls>
+  <source src="/audio/three_body-77.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>Here&rsquo;s another example:</p>
+<blockquote>
+<p>Curds are the solid part of cheese formed when milk coagulates, while whey is the liquid left after the curds are removed.</p>
+</blockquote>
+<audio controls>
+  <source src="/audio/curds-77.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+<p>How does it do with a very short example?</p>
+<blockquote>
+<p>A penny saved is a penny earned.</p>
+</blockquote>
+<audio controls>
+  <source src="/audio/pithy-77.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
 
 
   </div>
